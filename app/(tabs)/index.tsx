@@ -15,11 +15,11 @@ import { useEffect } from "react";
 export default function TabOneScreen() {
   const { reduceProduct, addProduct } = useCartStore();
 
-  // useEffect(() => {
-  //   useCartStore.subscribe((state) => {
-  //     console.log("STATE", state);
-  //   });
-  // }, []);
+  useEffect(() => {
+    useCartStore.subscribe((state) => {
+      console.log("STATE", state);
+    });
+  }, []);
 
   const renderItem: ListRenderItem<any> = ({ item }) => (
     <View style={styles.cartItemContainer}>

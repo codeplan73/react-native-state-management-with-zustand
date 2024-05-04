@@ -22,7 +22,7 @@ const useCartStore = create<CartState>()((set, get) => ({
         return p;
       });
 
-      if (!hasProduct) {
+      if (hasProduct) {
         return { products };
       }
       return { products: [...state.products, { ...product, quantity: 1 }] };
@@ -42,7 +42,10 @@ const useCartStore = create<CartState>()((set, get) => ({
       };
     }),
 
-  clearCart: () => set({ products: [] }),
+  clearCart: () =>
+    set(() => {
+      return { products: [] };
+    }),
 
   items: () => get().products.reduce((acc, p) => acc + p.quantity, 0),
 
