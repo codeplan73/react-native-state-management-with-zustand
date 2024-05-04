@@ -15,11 +15,11 @@ import { useEffect } from "react";
 export default function TabOneScreen() {
   const { reduceProduct, addProduct } = useCartStore();
 
-  useEffect(() => {
-    useCartStore.subscribe((state) => {
-      console.log("STATE", state);
-    });
-  }, []);
+  // useEffect(() => {
+  //   useCartStore.subscribe((state) => {
+  //     console.log("STATE", state);
+  //   });
+  // }, []);
 
   const renderItem: ListRenderItem<any> = ({ item }) => (
     <View style={styles.cartItemContainer}>
@@ -55,13 +55,17 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   cartItemContainer: {
+    backgroundColor: "white",
     flexDirection: "row",
     gap: 20,
-    marginBottom: 40,
+    marginBottom: 10,
+    padding: 10,
     alignItems: "center",
+    borderRadius: 10,
   },
   itemContainer: {
     flex: 1,
