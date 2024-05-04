@@ -1,4 +1,6 @@
 import { create, StateCreator, StoreMutatorIdentifier } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { zustandStorage } from "./mmkv";
 
 type Logger = <
   T extends unknown,
@@ -37,51 +39,57 @@ export interface CartState {
 }
 
 const useCartStore = create<CartState>()(
-  logger((set, get) => ({
-    products: [],
-    addProduct: (product: Product) =>
-      set((state) => {
-        let hasProduct = false;
-        const products = state.products.map((p) => {
-          if (p.id === product.id) {
-            hasProduct = true;
-            return { ...p, quantity: p.quantity + 1 };
+  persist(
+    logger((set, get) => ({
+      products: [],
+      addProduct: (product: Product) =>
+        set((state) => {
+          let hasProduct = false;
+          const products = state.products.map((p) => {
+            if (p.id === product.id) {
+              hasProduct = true;
+              return { ...p, quantity: p.quantity + 1 };
+            }
+            return p;
+          });
+
+          if (hasProduct) {
+            return { products };
           }
-          return p;
-        });
+          return { products: [...state.products, { ...product, quantity: 1 }] };
+        }),
 
-        if (hasProduct) {
-          return { products };
-        }
-        return { products: [...state.products, { ...product, quantity: 1 }] };
-      }),
+      reduceProduct: (product: Product) =>
+        set((state) => {
+          return {
+            products: state.products
+              .map((p) => {
+                if (p.id === product.id) {
+                  return { ...p, quantity: p.quantity - 1 };
+                }
+                return p;
+              })
+              .filter((p) => p.quantity > 0),
+          };
+        }),
 
-    reduceProduct: (product: Product) =>
-      set((state) => {
-        return {
-          products: state.products
-            .map((p) => {
-              if (p.id === product.id) {
-                return { ...p, quantity: p.quantity - 1 };
-              }
-              return p;
-            })
-            .filter((p) => p.quantity > 0),
-        };
-      }),
+      clearCart: () =>
+        set(() => {
+          return { products: [] };
+        }),
 
-    clearCart: () =>
-      set(() => {
-        return { products: [] };
-      }),
+      items: () => get().products.reduce((acc, p) => acc + p.quantity, 0),
 
-    items: () => get().products.reduce((acc, p) => acc + p.quantity, 0),
-
-    total: () =>
-      get()
-        .products.reduce((acc, p) => acc + p.price * p.quantity, 0)
-        .toFixed(2),
-  }))
+      total: () =>
+        get()
+          .products.reduce((acc, p) => acc + p.price * p.quantity, 0)
+          .toFixed(2),
+    })),
+    {
+      name: "cart",
+      storage: createJSONStorage(() => zustandStorage),
+    }
+  )
 );
 
 export default useCartStore;
